@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>十五日战线 | 大地图战场生存射击</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <canvas id="gameCanvas" aria-label="十五日战线游戏画布"></canvas>
+
+    <div id="hud" class="hud hidden">
+      <section class="hud-card vitals">
+        <div class="hud-title">身体状态</div>
+        <div class="bar-row">
+          <span>血量</span>
+          <div class="bar"><i id="hpBar"></i></div>
+          <b id="hpText">100</b>
+        </div>
+        <div class="bar-row">
+          <span>饥饿</span>
+          <div class="bar hunger"><i id="hungerBar"></i></div>
+          <b id="hungerText">100</b>
+        </div>
+        <div id="statusChips" class="chips"></div>
+      </section>
+
+      <section class="hud-card weapon-panel">
+        <div class="hud-title">当前武器</div>
+        <div id="weaponName" class="weapon-name">-</div>
+        <div id="ammoText" class="ammo">-</div>
+        <div id="weaponHint" class="subtle">左键/空格射击 · 右键/Q 精瞄 · R 换弹</div>
+      </section>
+
+      <section class="hud-card time-panel">
+        <div class="hud-title">战役时间</div>
+        <div id="timeText" class="time-text">第 1 天 08:00</div>
+        <div id="weatherText" class="subtle">天气：晴朗</div>
+        <div id="airdropText" class="subtle">空投：暂无</div>
+      </section>
+
+      <section class="hud-card faction-panel">
+        <div class="hud-title">战场态势</div>
+        <div id="factionText" class="subtle">阵营接触：-</div>
+        <div id="squadText" class="subtle">附近友军：-</div>
+      </section>
+
+      <section class="hud-card tasks-panel">
+        <div class="hud-title">系统任务（完成 5 个胜利）</div>
+        <ol id="taskList"></ol>
+      </section>
+
+      <section class="hud-card inventory-panel">
+        <div class="hud-title">补给</div>
+        <div id="inventoryList" class="inventory-grid"></div>
+        <div class="subtle keys">Z 绷带 · X 夹板 · C 输血包 · V 口粮 · B 抗生素 · G 弹药箱 · E 搜索</div>
+      </section>
+
+      <section id="minimapPanel" class="hud-card minimap-panel">
+        <canvas id="miniMap" width="190" height="190" aria-label="小地图"></canvas>
+        <div class="subtle">按住 M 放大小地图</div>
+      </section>
+    </div>
+
+    <div id="centerPrompt" class="center-prompt hidden"></div>
+    <div id="toastLog" class="toast-log" aria-live="polite"></div>
+
+    <div id="menu" class="overlay">
+      <div class="menu-panel">
+        <div class="kicker">Canvas / WebGL Tactical Survival Prototype</div>
+        <h1>十五日战线</h1>
+        <p class="lead">
+          大地图 3D 战场生存射击：昼夜交替、随机任务、多阵营部队、战术 NPC、狩猎觅食、抢夺空投、流血/骨折/饥饿/感染等身体状态。
+          死亡会直接回到主界面；生存十五天触发“兵役结束”结局，完成随机五个系统任务触发“胜利”结局。
+        </p>
+
+        <div id="endMessage" class="end-message hidden"></div>
+
+        <div class="menu-actions">
+          <button id="startBtn" class="primary">开始部署</button>
+          <button id="resumeBtn" class="hidden">继续战斗</button>
+          <button id="settingsBtn">设置</button>
+          <button id="armoryBtn">武器研究</button>
+          <button id="helpBtn">操作说明</button>
+        </div>
+
+        <section id="settingsPanel" class="drawer hidden">
+          <h2>游戏参数</h2>
+          <div class="settings-grid">
+            <label>
+              难度
+              <select id="difficultyInput">
+                <option value="0.75">新兵：敌人少、伤害低</option>
+                <option value="1" selected>标准：完整体验</option>
+                <option value="1.35">老兵：敌人更准、生存压力更高</option>
+                <option value="1.7">噩梦：NPC 更积极争夺资源</option>
+              </select>
+            </label>
+            <label>
+              地图规模
+              <select id="mapSizeInput">
+                <option value="9000">大型 9km 战区</option>
+                <option value="12500" selected>极大战线 12.5km 战区</option>
+                <option value="16000">远征纵深 16km 战区</option>
+              </select>
+            </label>
+            <label>
+              昼夜速度（每昼夜现实分钟）
+              <input id="dayLengthInput" type="range" min="2" max="9" step="0.5" value="4" />
+              <span id="dayLengthValue">4.0 分钟</span>
+            </label>
+            <label>
+              NPC 密度
+              <input id="npcDensityInput" type="range" min="0.5" max="2" step="0.1" value="1" />
+              <span id="npcDensityValue">1.0x</span>
+            </label>
+            <label>
+              野生动物密度
+              <input id="wildlifeDensityInput" type="range" min="0.5" max="2.4" step="0.1" value="1.2" />
+              <span id="wildlifeDensityValue">1.2x</span>
+            </label>
+            <label>
+              视角/瞄准灵敏度
+              <input id="sensitivityInput" type="range" min="0.45" max="2.3" step="0.05" value="1" />
+              <span id="sensitivityValue">1.00x</span>
+            </label>
+            <label>
+              辅助瞄准
+              <input id="aimAssistInput" type="range" min="0" max="0.35" step="0.01" value="0.08" />
+              <span id="aimAssistValue">0.08</span>
+            </label>
+            <label>
+              触控板友好模式
+              <select id="trackpadModeInput">
+                <option value="auto" selected>自动：Mac/触控板优先</option>
+                <option value="on">开启：Q 切换精瞄，空格射击</option>
+                <option value="off">关闭：传统鼠标按住右键精瞄</option>
+              </select>
+            </label>
+            <label>
+              音量
+              <input id="volumeInput" type="range" min="0" max="1" step="0.05" value="0.35" />
+              <span id="volumeValue">35%</span>
+            </label>
+          </div>
+          <p class="subtle">
+            触控板友好模式建议 MacBook/笔记本玩家开启：Q 保持精瞄，空格持续射击，左键点按也能补足短射击窗口。
+          </p>
+        </section>
+
+        <section id="armoryPanel" class="drawer hidden">
+          <h2>武器研究与手感差异</h2>
+          <p class="subtle">
+            每把武器都有独立弹速、散布、后坐、弹匣、换弹、重量、噪音和 NPC 偏好。右键或 Q 精瞄降低散布但移动变慢；枪声会吸引附近部队。
+          </p>
+          <div id="weaponCards" class="weapon-cards"></div>
+        </section>
+
+        <section id="helpPanel" class="drawer hidden">
+          <h2>操作说明</h2>
+          <div class="help-grid">
+            <div><b>WASD</b><span>移动，Shift 冲刺（饥饿消耗更快）</span></div>
+            <div><b>鼠标/触控板</b><span>左键/点按射击；触控板可用空格持续射击</span></div>
+            <div><b>右键 / Q</b><span>右键按住精瞄；Q 切换精瞄保持，适合触控板</span></div>
+            <div><b>1-8</b><span>切换武器；不同武器有完全不同射击节奏</span></div>
+            <div><b>R</b><span>换弹；骨折会降低移动并拖慢换弹</span></div>
+            <div><b>E</b><span>搜索尸体、动物、空投、情报、补给箱</span></div>
+            <div><b>Z</b><span>绷带：只移除流血，不回血</span></div>
+            <div><b>X</b><span>夹板：只移除骨折，不回血</span></div>
+            <div><b>C</b><span>输血包：唯一回血手段，不移除 debuff</span></div>
+            <div><b>V</b><span>口粮：只恢复饥饿度</span></div>
+            <div><b>B</b><span>抗生素：只移除感染</span></div>
+            <div><b>G</b><span>弹药箱：补充当前武器弹药</span></div>
+            <div><b>Esc</b><span>暂停并回到菜单；死亡不能继续，只能重新开始</span></div>
+            <div><b>M</b><span>按住放大小地图，查看任务、空投和阵营接触</span></div>
+            <div><b>触控板</b><span>推荐开启友好模式：Q 保持精瞄，空格持续射击，减少双指/右键误触</span></div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <script src="vendor/three.min.js"></script>
+    <script src="vendor/GLTFLoader.js"></script>
+    <script src="src/game.js"></script>
+  </body>
+</html>
