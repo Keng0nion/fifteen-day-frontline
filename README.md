@@ -8,6 +8,8 @@
 
 一个基于浏览器的 3D/WebGL 大地图战场生存射击原型。
 
+![Fifteen-Day Frontline main menu](./docs/screenshot.png)
+
 ## 在线游玩
 
 GitHub Pages 部署完成后，访问：
