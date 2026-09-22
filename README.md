@@ -2,11 +2,11 @@
 
 A browser-based 3D/WebGL large-map battlefield survival shooter prototype.
 
+![Fifteen-Day Frontline main menu](./docs/screenshot.png)
+
 ## Play Online
 
-After the GitHub Pages deployment, visit:
-
-https://keng0nion.github.io/fifteen-day-frontline/
+Play online in your browser: **[keng0nion.github.io/fifteen-day-frontline](https://keng0nion.github.io/fifteen-day-frontline/)**
 
 ## Game Content
 
