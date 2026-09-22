@@ -8,6 +8,8 @@
 
 ブラウザで動作する 3D/WebGL 大マップ戦場サバイバルシューターのプロトタイプ。
 
+![Fifteen-Day Frontline メインメニュー](./docs/screenshot.png)
+
 ## オンラインで遊ぶ
 
 GitHub Pages へのデプロイ後、以下にアクセスしてください：

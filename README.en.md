@@ -8,6 +8,8 @@
 
 A browser-based 3D/WebGL large-map battlefield survival shooter prototype.
 
+![Fifteen-Day Frontline main menu](./docs/screenshot.png)
+
 ## Play Online
 
 After the GitHub Pages deployment, visit:
