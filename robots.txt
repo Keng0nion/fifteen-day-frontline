@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://keng0nion.github.io/fifteen-day-frontline/sitemap.xml
